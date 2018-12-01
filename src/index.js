@@ -66,8 +66,10 @@ window.onload = () => {
     //CANVAS
     const canvas = document.getElementById('board');
     const ctx = canvas.getContext('2d');
+    const Block_M = document.getElementById('Block_M');
+    const Block_P = document.getElementById('Block_P');
 
-    const board = new Board(configMap, ctx);
+    const board = new Board(configMap, ctx, Block_M, Block_P);
     const cursor = new Cursor({x:board.width/2, y:board.height/2});
 
     const army1 = new Army('Bob', 'Blue', [
@@ -91,12 +93,11 @@ window.onload = () => {
 
     const game = new Game(board, army1, army2);
 
+    
     game.fight(game.army1.units[0], game.army2.units[0]);
-
+    
     board.draw();
-
-
-
+    
 }
 
 window.onkeyup = function(e) {
