@@ -63,40 +63,42 @@ const configBazooka = {
 };
 
 window.onload = () => {
-    //CANVAS
-    const canvas = document.getElementById('board');
-    const ctx = canvas.getContext('2d');
-    const Block_M = document.getElementById('Block_M');
-    const Block_P = document.getElementById('Block_P');
-
-    const board = new Board(configMap, ctx, Block_M, Block_P);
+    //Board
+    const boardCanvas = document.getElementById("board-layer");
+    const boardCtx = boardCanvas.getContext("2d");
+    const board = new Board(configMap, boardCtx);
+    
     const cursor = new Cursor({x:board.width/2, y:board.height/2});
 
+    const armiesCanvas = document.getElementById("armies-layer");
+    const armiesCtx = armiesCanvas.getContext("2d");
     const army1 = new Army('Bob', 'Blue', [
-        new Tank({x:29, y:0}, configTank),
-        new Tank({x:30, y:0}, configTank),
-        new Infantry({x:29, y:1}, configInfantry),
-        new Infantry({x:29, y:2}, configInfantry),
-        new Bazooka({x:30, y:1}, configBazooka),
-        new Bazooka({x:30, y:2}, configBazooka),
-    ]);
+        new Tank({x:18, y:0}, configTank),
+        new Tank({x:19, y:0}, configTank),
+        new Infantry({x:18, y:1}, configInfantry),
+        new Infantry({x:18, y:2}, configInfantry),
+        new Bazooka({x:19, y:1}, configBazooka),
+        new Bazooka({x:19, y:2}, configBazooka),
+    ], configMap, armiesCtx);
 
     const army2 = new Army('Bill', 'Red', [
-        new Tank({x:0, y:29}, configTank),
-        new Tank({x:0, y:30}, configTank),
-        new Infantry({x:1, y:29}, configInfantry),
-        new Infantry({x:2, y:29}, configInfantry),
-        new Bazooka({x:1, y:30}, configBazooka),
-        new Bazooka({x:2, y:30}, configBazooka),
-    ]);
+        new Tank({x:0, y:18}, configTank),
+        new Tank({x:0, y:19}, configTank),
+        new Infantry({x:1, y:18}, configInfantry),
+        new Infantry({x:2, y:18}, configInfantry),
+        new Bazooka({x:1, y:19}, configBazooka),
+        new Bazooka({x:2, y:19}, configBazooka),
+    ], configMap, armiesCtx);
 
 
     const game = new Game(board, army1, army2);
 
-    
-    game.fight(game.army1.units[0], game.army2.units[0]);
+    //game.fight(game.army1.units[0], game.army2.units[0]);
     
     board.draw();
+    
+    army1.draw();
+    army2.draw();
     
 }
 
