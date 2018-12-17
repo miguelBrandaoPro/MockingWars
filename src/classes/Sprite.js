@@ -1,9 +1,11 @@
 import main_sprite from '../images/main_sprite.png';
 
 export default class Sprite {
-    constructor(config) {
+    constructor(config, boardCtx, armiesCtx) {
         this.config = config;
         this._src = '';
+        this.boardCtx = boardCtx;
+        this.armiesCtx = armiesCtx;
     }
 
     promiseOfLoadedSprite(){
@@ -21,12 +23,16 @@ export default class Sprite {
         this._src = newSrc;
     }
 
-    draw( ctx, position ){
-        ctx.drawImage(this._src,
+    drawUnit( unit ){
+        armiesCtx.drawImage(this._src,
             configBlockSprite.x, configBlockSprite.y,
             this.config.blockSize, this.config.blockSize,
             position.x*this.config.blockSize, position.y*this.config.blockSize,
             this.config.blockSize, this.config.blockSize);
+    }
+
+    drawBoardBlock( boardBlock ){
+
     }
 
 
