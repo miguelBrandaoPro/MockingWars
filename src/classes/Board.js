@@ -1,53 +1,46 @@
-import main_sprite from '../images/main_sprite.png';
-
 export default class Board{
-    constructor(config, ctx){
+    constructor(config, ctx, sprite){
         this.blockSize = config.blockSize
         this.height = config.height;
         this.width = config.width;
         this.map = config.map;
-        this.main_sprite = '';
+        this.sprite = sprite;
         this.blocks = config.blocks;
         this.ctx = ctx;
     }
 
     draw(){
-        this.promiseOfLoadedSprite().then((image) =>{
-            this.main_sprite = image;
-            for(let i=0; i<this.height; i++){
-                for(let j=0; j<this.width; j++) {
-                    this.drawBlock( {x:j, y:i}, this.map[i][j]);
+        for(let i=0; i<this.height; i++){
+            for(let j=0; j<this.width; j++) {
+                switch(this.map[i][j]){
+                    case 'M':
+                        this.drawMountainBlock({x:j, y:i});
+                        break;
+                    case 'R':
+                        this.drawRoadBlock({x:j, y:i});
+                        break;
+                    case 'P':
+                    default:
+                        this.drawPlainBlock({x:j, y:i});
+                        break;
+
                 }
             }
-        });
-    }
-
-    drawBlock(position, type){
-        switch(type){
-            case 'M':
-                this.drawMountainBlock(position);
-                break;
-            case 'R':
-                this.drawRoadBlock(position);
-                break;
-            case 'P':
-            default:
-                this.drawPlainBlock(position);
-                break;
         }
     }
 
     drawPlainBlock(position){
-        const block = this.blocks.block_p;
-        this.ctx.drawImage(this.main_sprite, 
-                           block.x, block.y, 
-                           this.blockSize, this.blockSize,
-                           position.x*this.blockSize, position.y*this.blockSize, 
-                           this.blockSize, this.blockSize);
+        const configBlockSprite = this.blocks.block_p;
+        this.drawBlock(configBlockSprite, position);
+    }
+
+    drawMountainBlock(position){
+        const configBlockSprite = this.blocks.block_m;
+        this.drawBlock(configBlockSprite, position);
     }
 
     drawRoadBlock(position){
-        let block = this.blocks.block_r.default;
+        let configBlockSprite = this.blocks.block_r.default;
 
         //test 4 cases R
         if(this.map[position.y][position.x-1] == 'R'
@@ -55,89 +48,63 @@ export default class Board{
            && this.map[position.y-1][position.x] == 'R'
            && this.map[position.y+1][position.x-1] == 'R'
           ){
-            block = this.blocks.block_r.crossroad;
+            configBlockSprite = this.blocks.block_r.crossroad;
         }
         //Tests 3 cases R
         else if(this.map[position.y-1][position.x] == 'R'
                && this.map[position.y+1][position.x] == 'R'
-                && this.map[position.y][position.x+1] == 'R'
                ){
-            block = this.blocks.block_r.tSection1;
-        }
-        else if(this.map[position.y-1][position.x] == 'R'
-               && this.map[position.y+1][position.x] == 'R'
-                && this.map[position.y][position.x-1] == 'R'
-               ){
-            block = this.blocks.block_r.tSection3;
+            if(this.map[position.y][position.x+1] == 'R'){
+                configBlockSprite = this.blocks.block_r.tSection1;
+            }
+            else if (this.map[position.y][position.x-1] == 'R'){
+                configBlockSprite = this.blocks.block_r.tSection3;
+            }
         }
         else if(this.map[position.y][position.x-1] == 'R'
                 && this.map[position.y][position.x+1] == 'R'
-                && this.map[position.y+1][position.x] == 'R'
                ){
-            block = this.blocks.block_r.tSection2;
-        }
-        else if(this.map[position.y][position.x-1] == 'R'
-                && this.map[position.y][position.x+1] == 'R'
-                && this.map[position.y-1][position.x] == 'R'
-               ){
-            block = this.blocks.block_r.tSection4;
+            if(this.map[position.y+1][position.x] == 'R'){
+                configBlockSprite = this.blocks.block_r.tSection2;
+            }
+            else if(this.map[position.y-1][position.x] == 'R'){
+                configBlockSprite = this.blocks.block_r.tSection4;
+            }
         }
         // Tests 2 cases R
-        else if(
-            this.map[position.y][position.x+1] == 'R'
-           && this.map[position.y+1][position.x] == 'R'
-          ){
-            block = this.blocks.block_r.rightTurn1;
+        else if( this.map[position.y+1][position.x] == 'R' ){
+            if( this.map[position.y][position.x+1] == 'R' ) {
+                configBlockSprite = this.blocks.block_r.rightTurn1;
+            }
+            else if( this.map[position.y][position.x-1] == 'R' ){
+                configBlockSprite = this.blocks.block_r.rightTurn2;
+            }
         }
-        else if(
-            this.map[position.y][position.x-1] == 'R'
-           && this.map[position.y+1][position.x] == 'R'
-          ){
-            block = this.blocks.block_r.rightTurn2;
+        else if( this.map[position.y-1][position.x] == 'R' ){
+            if(this.map[position.y][position.x-1] == 'R'){
+                configBlockSprite = this.blocks.block_r.rightTurn3;
+            }
+            else if( this.map[position.y][position.x+1] == 'R' ){
+                configBlockSprite = this.blocks.block_r.rightTurn4;
+            }
         }
-        else if(
-            this.map[position.y][position.x-1] == 'R'
-           && this.map[position.y-1][position.x] == 'R'
-          ){
-            block = this.blocks.block_r.rightTurn3;
-        }
-        else if(
-            this.map[position.y][position.x+1] == 'R'
-           && this.map[position.y-1][position.x] == 'R'
-          ){
-            block = this.blocks.block_r.rightTurn4;
-        }
+        // Tests 1 case R
         else if(this.map[position.y][position.x-1] == 'R'){
-            block = this.blocks.block_r.horizontal;
+            configBlockSprite = this.blocks.block_r.horizontal;
         }
         else if(this.map[position.y-1][position.x] == 'R'){
-            block = this.blocks.block_r.vertical;
+            configBlockSprite = this.blocks.block_r.vertical;
         }
-        this.ctx.drawImage(this.main_sprite, 
-                           block.x, block.y, 
-                           this.blockSize, this.blockSize,
-                           position.x*this.blockSize, position.y*this.blockSize, 
-                           this.blockSize, this.blockSize);
+
+        this.drawBlock(configBlockSprite, position);
     }
 
-    drawMountainBlock(position){
-        const block = this.blocks.block_m;
-        this.ctx.drawImage(this.main_sprite, 
-                           block.x, block.y, 
-                           this.blockSize, this.blockSize,
-                           position.x*this.blockSize, position.y*this.blockSize, 
-                           this.blockSize, this.blockSize);
+    drawBlock(configBlockSprite, position){
+        this.ctx.drawImage(this.sprite,
+                            configBlockSprite.x, configBlockSprite.y,
+                            this.blockSize, this.blockSize,
+                            position.x*this.blockSize, position.y*this.blockSize,
+                            this.blockSize, this.blockSize);
     }
-    
-    
-    promiseOfLoadedSprite(){
-      return new Promise(function (resolve) {
-        const img = new Image();
-        img.src = main_sprite;
-        img.onload = function () {
-          // Image has loaded... resolve the promise!
-          resolve(img);
-        };
-      });
-    }
+
 }

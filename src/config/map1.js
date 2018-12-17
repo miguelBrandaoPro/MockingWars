@@ -1,4 +1,4 @@
-export const configMap ={
+export default configMap ={
     blockSize:24,
     width:20,
     height:20,
@@ -41,19 +41,5 @@ export const configMap ={
                         tSection3:  {x: 978, y: 195},
                         tSection4:  {x: 952, y: 220},
                     }
-    },
-    
-    armies: {
-        'Red' : {
-            'Infantry': {x: 374, y: 9},
-            'Bazooka': {x: 399, y: 9},
-            'Tank': {x: 482, y: 9}
-        },
-        'Blue' : {
-            'Infantry': {x: 374, y: 36},
-            'Bazooka': {x: 399, y: 36},
-            'Tank': {x: 482, y: 36}         
-        }
-    
     }
 };

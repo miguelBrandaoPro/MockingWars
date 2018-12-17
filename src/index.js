@@ -9,7 +9,11 @@ import Board from './classes/Board';
 
 import Game from './classes/Game';
 
-import { configMap } from './config/map1';
+import Sprite from './classes/Sprite';
+
+import configMap from './config/map1';
+import configArmies from './config/armies';
+import configSprite from './config/sprite';
 
 const configTank = {
     life: 10,
@@ -63,43 +67,50 @@ const configBazooka = {
 };
 
 window.onload = () => {
-    //Board
+
+    //Canvases
+    //Board Canvas
     const boardCanvas = document.getElementById("board-layer");
     const boardCtx = boardCanvas.getContext("2d");
-    const board = new Board(configMap, boardCtx);
-    
-    const cursor = new Cursor({x:board.width/2, y:board.height/2});
 
+    //Armies Canvas
     const armiesCanvas = document.getElementById("armies-layer");
     const armiesCtx = armiesCanvas.getContext("2d");
-    const army1 = new Army('Bob', 'Blue', [
-        new Tank({x:18, y:0}, configTank),
-        new Tank({x:19, y:0}, configTank),
-        new Infantry({x:18, y:1}, configInfantry),
-        new Infantry({x:18, y:2}, configInfantry),
-        new Bazooka({x:19, y:1}, configBazooka),
-        new Bazooka({x:19, y:2}, configBazooka),
-    ], configMap, armiesCtx);
 
-    const army2 = new Army('Bill', 'Red', [
-        new Tank({x:0, y:18}, configTank),
-        new Tank({x:0, y:19}, configTank),
-        new Infantry({x:1, y:18}, configInfantry),
-        new Infantry({x:2, y:18}, configInfantry),
-        new Bazooka({x:1, y:19}, configBazooka),
-        new Bazooka({x:2, y:19}, configBazooka),
-    ], configMap, armiesCtx);
+    const sprite = new Sprite();
 
+    sprite.promiseOfLoadedSprite().then((image) =>{
 
-    const game = new Game(board, army1, army2);
+        sprite.src(image);
 
-    //game.fight(game.army1.units[0], game.army2.units[0]);
-    
-    board.draw();
-    
-    army1.draw();
-    army2.draw();
-    
+        const board = new Board(configMap, boardCtx, image);
+
+        const cursor = new Cursor({x:board.width/2, y:board.height/2});
+
+        const army1 = new Army('Bob', 'Blue', [
+            new Tank({x:18, y:0}, configTank),
+            new Tank({x:19, y:0}, configTank),
+            new Infantry({x:18, y:1}, configInfantry),
+            new Infantry({x:18, y:2}, configInfantry),
+            new Bazooka({x:19, y:1}, configBazooka),
+            new Bazooka({x:19, y:2}, configBazooka),
+        ], configArmies, armiesCtx, image);
+
+        const army2 = new Army('Bill', 'Red', [
+            new Tank({x:0, y:18}, configTank),
+            new Tank({x:0, y:19}, configTank),
+            new Infantry({x:1, y:18}, configInfantry),
+            new Infantry({x:2, y:18}, configInfantry),
+            new Bazooka({x:1, y:19}, configBazooka),
+            new Bazooka({x:2, y:19}, configBazooka),
+        ], configArmies, armiesCtx, image);
+
+        board.draw();
+        army1.draw();
+        army2.draw();
+
+    });
+
 }
 
 window.onkeyup = function(e) {
@@ -119,7 +130,6 @@ window.onkeyup = function(e) {
             break;
         case 'Space':
             game.selectUnit(cursor.position);
-            console.log(game.armyPlaying.units);
             break;
         default:
             console.log(key);
