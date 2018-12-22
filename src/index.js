@@ -1,4 +1,9 @@
 'use strict'
+
+import configMap from './config/map1';
+import configArmies from './config/armies';
+import configSprite from './config/sprite';
+
 import Bazooka from './classes/Bazooka';
 import Infantry from './classes/Infantry';
 import Tank from './classes/Tank';
@@ -9,11 +14,7 @@ import Board from './classes/Board';
 
 import Game from './classes/Game';
 
-import Sprite from './classes/Sprite';
-
-import configMap from './config/map1';
-import configArmies from './config/armies';
-import configSprite from './config/sprite';
+import Drawer from './classes/Drawer';
 
 const configTank = {
     life: 10,
@@ -76,64 +77,79 @@ window.onload = () => {
     //Armies Canvas
     const armiesCanvas = document.getElementById("armies-layer");
     const armiesCtx = armiesCanvas.getContext("2d");
+    
+    //Cursor Canvas
+    const cursorCanvas = document.getElementById("cursor-layer");
+    const cursorCtx = cursorCanvas.getContext("2d");
 
-    const sprite = new Sprite();
+    const drawer = new Drawer(configSprite, armiesCtx, boardCtx, cursorCtx );
+   
+    const board = new Board(configMap, drawer);
 
-    sprite.promiseOfLoadedSprite().then((image) =>{
+    const cursor = new Cursor({x:board.width/2, y:board.height/2}, drawer);
 
-        sprite.src(image);
+    const army1 = new Army('Bob', 'Blue', [
+        new Tank({x:18, y:0}, configTank),
+        new Tank({x:19, y:0}, configTank),
+        new Infantry({x:18, y:1}, configInfantry),
+        new Infantry({x:18, y:2}, configInfantry),
+        new Bazooka({x:19, y:1}, configBazooka),
+        new Bazooka({x:19, y:2}, configBazooka),
+    ], drawer);
 
-        const board = new Board(configMap, boardCtx, image);
-
-        const cursor = new Cursor({x:board.width/2, y:board.height/2});
-
-        const army1 = new Army('Bob', 'Blue', [
-            new Tank({x:18, y:0}, configTank),
-            new Tank({x:19, y:0}, configTank),
-            new Infantry({x:18, y:1}, configInfantry),
-            new Infantry({x:18, y:2}, configInfantry),
-            new Bazooka({x:19, y:1}, configBazooka),
-            new Bazooka({x:19, y:2}, configBazooka),
-        ], configArmies, armiesCtx, image);
-
-        const army2 = new Army('Bill', 'Red', [
-            new Tank({x:0, y:18}, configTank),
-            new Tank({x:0, y:19}, configTank),
-            new Infantry({x:1, y:18}, configInfantry),
-            new Infantry({x:2, y:18}, configInfantry),
-            new Bazooka({x:1, y:19}, configBazooka),
-            new Bazooka({x:2, y:19}, configBazooka),
-        ], configArmies, armiesCtx, image);
-
+    const army2 = new Army('Bill', 'Red', [
+        new Tank({x:0, y:18}, configTank),
+        new Tank({x:0, y:19}, configTank),
+        new Infantry({x:1, y:18}, configInfantry),
+        new Infantry({x:2, y:18}, configInfantry),
+        new Bazooka({x:1, y:19}, configBazooka),
+        new Bazooka({x:2, y:19}, configBazooka),
+    ], drawer);
+    
+    
+    drawer.promiseOfLoadedSprite().then((image) =>{
+        drawer.sprite(image);
         board.draw();
         army1.draw();
         army2.draw();
-
+        cursor.draw();
     });
 
+
+    window.onkeyup = function(e) {
+        let key = e.code;
+        switch (key){
+            case 'ArrowUp':
+                cursor.moveTo({x: cursor.position.x, y: cursor.position.y-1});
+                cursor.draw();
+                break;
+            case 'ArrowDown':
+                cursor.moveTo({x: cursor.position.x, y: cursor.position.y+1});
+                cursor.draw();
+                break;
+            case 'ArrowLeft':
+                cursor.moveTo({x: cursor.position.x-1, y: cursor.position.y});
+                cursor.draw();
+                break;
+            case 'ArrowRight':
+                cursor.moveTo({x: cursor.position.x+1, y: cursor.position.y});
+                cursor.draw();
+                break;
+            case 'Space':
+                game.selectUnit(cursor.position);
+                cursor.draw();
+                break;
+            default:
+                console.log(key);
+                break;
+        }
+    }
+    
+
+    
+
+
 }
 
-window.onkeyup = function(e) {
-    let key = e.code;
-    switch (key){
-        case 'ArrowUp':
-            cursor.moveTo({x: cursor.position.x, y: cursor.position.y-1});
-            break;
-        case 'ArrowDown':
-            cursor.moveTo({x: cursor.position.x, y: cursor.position.y+1});
-            break;
-        case 'ArrowLeft':
-            cursor.moveTo({x: cursor.position.x-1, y: cursor.position.y});
-            break;
-        case 'ArrowRight':
-            cursor.moveTo({x: cursor.position.x+1, y: cursor.position.y});
-            break;
-        case 'Space':
-            game.selectUnit(cursor.position);
-            break;
-        default:
-            console.log(key);
-            break;
-    }
-}
+
 

@@ -1,4 +1,4 @@
-export default configSprite ={
+const configSprite={
     blockSize:24,
     board: {
         'block_m' : {x: 377, y: 165},
@@ -29,5 +29,10 @@ export default configSprite ={
             'Bazooka': {x: 399, y: 36},
             'Tank': {x: 482, y: 36}
         }
+    },
+    cursor : {
+        position : {x:104, y:369},
+        size : {w:43, h:48}
     }
 };
+export default configSprite;

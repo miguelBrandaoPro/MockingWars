@@ -1,12 +1,9 @@
 export default class Board{
-    constructor(config, ctx, sprite){
-        this.blockSize = config.blockSize
+    constructor(config, drawer){
         this.height = config.height;
         this.width = config.width;
         this.map = config.map;
-        this.sprite = sprite;
-        this.blocks = config.blocks;
-        this.ctx = ctx;
+        this.drawer = drawer;
     }
 
     draw(){
@@ -14,14 +11,14 @@ export default class Board{
             for(let j=0; j<this.width; j++) {
                 switch(this.map[i][j]){
                     case 'M':
-                        this.drawMountainBlock({x:j, y:i});
+                        this.drawer.drawBlock('block_m', {x:j, y:i});
                         break;
                     case 'R':
-                        this.drawRoadBlock({x:j, y:i});
+                        this.drawer.drawBlock('block_r.'+this.getRoadBlockConfig({x:j, y:i}), {x:j, y:i});
                         break;
                     case 'P':
                     default:
-                        this.drawPlainBlock({x:j, y:i});
+                        this.drawer.drawBlock('block_p', {x:j, y:i});
                         break;
 
                 }
@@ -29,82 +26,64 @@ export default class Board{
         }
     }
 
-    drawPlainBlock(position){
-        const configBlockSprite = this.blocks.block_p;
-        this.drawBlock(configBlockSprite, position);
-    }
 
-    drawMountainBlock(position){
-        const configBlockSprite = this.blocks.block_m;
-        this.drawBlock(configBlockSprite, position);
-    }
-
-    drawRoadBlock(position){
-        let configBlockSprite = this.blocks.block_r.default;
-
+    getRoadBlockConfig(position){
+        
         //test 4 cases R
         if(this.map[position.y][position.x-1] == 'R'
           && this.map[position.y][position.x+1] == 'R'
            && this.map[position.y-1][position.x] == 'R'
            && this.map[position.y+1][position.x-1] == 'R'
           ){
-            configBlockSprite = this.blocks.block_r.crossroad;
+            return 'crossroad';
         }
         //Tests 3 cases R
         else if(this.map[position.y-1][position.x] == 'R'
                && this.map[position.y+1][position.x] == 'R'
                ){
             if(this.map[position.y][position.x+1] == 'R'){
-                configBlockSprite = this.blocks.block_r.tSection1;
+                return 'tSection1';
             }
             else if (this.map[position.y][position.x-1] == 'R'){
-                configBlockSprite = this.blocks.block_r.tSection3;
+                return 'tSection3';
+            }
+            else{
+                return 'vertical';
             }
         }
         else if(this.map[position.y][position.x-1] == 'R'
                 && this.map[position.y][position.x+1] == 'R'
                ){
             if(this.map[position.y+1][position.x] == 'R'){
-                configBlockSprite = this.blocks.block_r.tSection2;
+                return 'tSection2';
             }
             else if(this.map[position.y-1][position.x] == 'R'){
-                configBlockSprite = this.blocks.block_r.tSection4;
+                return 'tSection4';
+            }
+            else{
+                return 'horizontal';  
             }
         }
         // Tests 2 cases R
         else if( this.map[position.y+1][position.x] == 'R' ){
             if( this.map[position.y][position.x+1] == 'R' ) {
-                configBlockSprite = this.blocks.block_r.rightTurn1;
+                return 'rightTurn1';
             }
             else if( this.map[position.y][position.x-1] == 'R' ){
-                configBlockSprite = this.blocks.block_r.rightTurn2;
+                return 'rightTurn2';
             }
         }
         else if( this.map[position.y-1][position.x] == 'R' ){
             if(this.map[position.y][position.x-1] == 'R'){
-                configBlockSprite = this.blocks.block_r.rightTurn3;
+                return 'rightTurn3';
             }
             else if( this.map[position.y][position.x+1] == 'R' ){
-                configBlockSprite = this.blocks.block_r.rightTurn4;
+                return 'rightTurn4';
             }
         }
-        // Tests 1 case R
-        else if(this.map[position.y][position.x-1] == 'R'){
-            configBlockSprite = this.blocks.block_r.horizontal;
-        }
-        else if(this.map[position.y-1][position.x] == 'R'){
-            configBlockSprite = this.blocks.block_r.vertical;
-        }
-
-        this.drawBlock(configBlockSprite, position);
+        return 'default';
     }
 
-    drawBlock(configBlockSprite, position){
-        this.ctx.drawImage(this.sprite,
-                            configBlockSprite.x, configBlockSprite.y,
-                            this.blockSize, this.blockSize,
-                            position.x*this.blockSize, position.y*this.blockSize,
-                            this.blockSize, this.blockSize);
-    }
+
 
 }

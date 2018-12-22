@@ -1,5 +1,4 @@
-export default configMap ={
-    blockSize:24,
+const configMap ={
     width:20,
     height:20,
     map: [
@@ -23,23 +22,7 @@ export default configMap ={
         ['P', 'R', 'R', 'R', 'P', 'P', 'P', 'M', 'M', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'M', 'M', 'P', 'R', 'P', 'P', 'P', 'P'],
         ['M', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'P', 'P', 'P', 'P'],
         ['M', 'M', 'P', 'P', 'P', 'P', 'M', 'M', 'M', 'M', 'P', 'P', 'P', 'P', 'P', 'P', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'P']
-    ],
-    blocks: {
-        'block_m' : {x: 377, y: 165}, 
-        'block_p' : {x: 377, y: 224}, 
-        'block_r' : {
-                        default:    {x: 900, y: 170},
-                        vertical:   {x: 900, y: 220},
-                        horizontal: {x: 900, y: 195},
-                        crossroad:  {x: 952, y: 195},
-                        rightTurn1: {x: 927, y: 170},
-                        rightTurn2: {x: 978, y: 170},
-                        rightTurn3: {x: 978, y: 220},
-                        rightTurn4: {x: 927, y: 220},
-                        tSection1:  {x: 927, y: 195},
-                        tSection2:  {x: 952, y: 170},
-                        tSection3:  {x: 978, y: 195},
-                        tSection4:  {x: 952, y: 220},
-                    }
-    }
+    ]
 };
+
+export default configMap;
