@@ -1,9 +1,10 @@
 export default class Game{
-    constructor(board, army1, army2){
+    constructor(board, army1, army2, cursor){
         this.board = board;
         this.army1 = army1;
         this.army2 = army2;
         this.armyPlaying = army1;
+        this.cursor = cursor;
     }
 
     fight(attacker, defender){
@@ -22,4 +23,10 @@ export default class Game{
             }
         }
     }
+    
+    canCursorMoveTo(futurePosition){
+        return futurePosition.x >=0 && futurePosition.x<this.board.width
+          && futurePosition.y >=0 && futurePosition.y<this.board.height;
+    }
+    
 }

@@ -83,9 +83,7 @@ window.onload = () => {
     const cursorCtx = cursorCanvas.getContext("2d");
 
     const drawer = new Drawer(configSprite, armiesCtx, boardCtx, cursorCtx );
-   
     const board = new Board(configMap, drawer);
-
     const cursor = new Cursor({x:board.width/2, y:board.height/2}, drawer);
 
     const army1 = new Army('Bob', 'Blue', [
@@ -106,6 +104,8 @@ window.onload = () => {
         new Bazooka({x:2, y:19}, configBazooka),
     ], drawer);
     
+    const game = new Game(board, army1, army2);
+    
     
     drawer.promiseOfLoadedSprite().then((image) =>{
         drawer.sprite(image);
@@ -118,22 +118,35 @@ window.onload = () => {
 
     window.onkeyup = function(e) {
         let key = e.code;
+        let newPosition;
         switch (key){
             case 'ArrowUp':
-                cursor.moveTo({x: cursor.position.x, y: cursor.position.y-1});
-                cursor.draw();
+                newPosition = {x: cursor.position.x, y: cursor.position.y-1};
+                if(game.canCursorMoveTo(newPosition)){
+                    cursor.moveTo(newPosition);
+                    cursor.draw();
+                }
                 break;
             case 'ArrowDown':
-                cursor.moveTo({x: cursor.position.x, y: cursor.position.y+1});
-                cursor.draw();
+                newPosition = {x: cursor.position.x, y: cursor.position.y+1};
+                if(game.canCursorMoveTo(newPosition)){
+                    cursor.moveTo(newPosition);
+                    cursor.draw();
+                }
                 break;
             case 'ArrowLeft':
-                cursor.moveTo({x: cursor.position.x-1, y: cursor.position.y});
-                cursor.draw();
+                newPosition = {x: cursor.position.x-1, y: cursor.position.y};
+                if(game.canCursorMoveTo(newPosition)){
+                    cursor.moveTo(newPosition);
+                    cursor.draw();
+                }
                 break;
             case 'ArrowRight':
-                cursor.moveTo({x: cursor.position.x+1, y: cursor.position.y});
-                cursor.draw();
+                newPosition = {x: cursor.position.x+1, y: cursor.position.y};
+                if(game.canCursorMoveTo(newPosition)){
+                    cursor.moveTo(newPosition);
+                    cursor.draw();
+                }
                 break;
             case 'Space':
                 game.selectUnit(cursor.position);
