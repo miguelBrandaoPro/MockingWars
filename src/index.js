@@ -81,15 +81,19 @@ window.onload = () => {
     //Cursor Canvas
     const cursorCanvas = document.getElementById("cursor-layer");
     const cursorCtx = cursorCanvas.getContext("2d");
+    
+    //Moves Canvas
+    const movesCanvas = document.getElementById("moves-layer");
+    const movesCtx = movesCanvas.getContext("2d");
 
-    const drawer = new Drawer(configSprite, armiesCtx, boardCtx, cursorCtx );
+    const drawer = new Drawer(configSprite, armiesCtx, boardCtx, movesCtx, cursorCtx );
     const board = new Board(configMap, drawer);
     const cursor = new Cursor({x:board.width/2, y:board.height/2}, drawer);
 
     const army1 = new Army('Bob', 'Blue', [
         new Tank({x:18, y:0}, configTank),
         new Tank({x:19, y:0}, configTank),
-        new Infantry({x:18, y:1}, configInfantry),
+        new Infantry({x:10, y:10}, configInfantry),
         new Infantry({x:18, y:2}, configInfantry),
         new Bazooka({x:19, y:1}, configBazooka),
         new Bazooka({x:19, y:2}, configBazooka),
@@ -105,7 +109,6 @@ window.onload = () => {
     ], drawer);
     
     const game = new Game(board, army1, army2);
-    
     
     drawer.promiseOfLoadedSprite().then((image) =>{
         drawer.sprite(image);
@@ -149,8 +152,27 @@ window.onload = () => {
                 }
                 break;
             case 'Space':
-                game.selectUnit(cursor.position);
-                cursor.draw();
+                if(game.selectedUnit == null){
+                    game.selectUnit(cursor.position);
+                    if(game.selectedUnit != null){
+                        drawer.drawPossibleUnitMoves(game.selectedUnit.canMoveTo(board));
+                    }
+                }
+                else{         
+                    for(let destPosition of game.selectedUnit.canMoveTo(board)){
+                        if( destPosition.x == cursor.position.x
+                           && destPosition.y == cursor.position.y){
+                            game.selectedUnit.moveTo(cursor.position);
+                            game.selectedUnit._selectable = false;
+                            game.selectedUnit = null;
+                            drawer.cleanArmiesCtx();
+                            drawer.cleanMovesCtx();
+                            game.army1.draw();
+                            game.army2.draw();
+                            break;
+                        }
+                    }  
+                }
                 break;
             default:
                 console.log(key);

@@ -4,6 +4,7 @@ export default class Unit {
         this.life = config.life;
         this.moveMax = config.moveMax;
         this.selected = false;
+        this._selectable = false;
         this.fight = config.fight
     }
 
@@ -20,9 +21,11 @@ export default class Unit {
             iX++  ){
 
             //On ajoute la position iX, y courant de l'unité
-            positions.push([iX, this.position.y]);
+            if(iX != this.position.x){
+                positions.push({x:iX, y:this.position.y});
+            }
 
-            const movesLeft = this.moveMax - (this.position.x - iX);
+            const movesLeft = this.moveMax - (Math.abs(this.position.x - iX));
 
             //si on n'utilise pas tous les mouvements possibles pour aller à ce X on peut bouger sur Y
             if( iX > minX ){
@@ -35,7 +38,7 @@ export default class Unit {
                         continue;
                     }
                     else{
-                        positions.push([iX, iY]);
+                        positions.push({x:iX, y:iY});
                     }
                 }
             }
@@ -50,5 +53,9 @@ export default class Unit {
 
     select(){
         this.selected = this.selected?false:true;
+    }
+    
+    selectable(status){
+        this._selectable = status;
     }
 }

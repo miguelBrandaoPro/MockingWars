@@ -3,8 +3,11 @@ export default class Game{
         this.board = board;
         this.army1 = army1;
         this.army2 = army2;
-        this.armyPlaying = army1;
+        this.selectedArmy = army1;
+        this.selectedUnit = null;
         this.cursor = cursor;
+        
+        this.setAllUnitsSelectable(army1);
     }
 
     fight(attacker, defender){
@@ -12,14 +15,15 @@ export default class Game{
         attacker.life -= defender.fight.defense[attacker.type];
     }
 
-
     selectUnit(position){
-        for( let i=0; i<this.armyPlaying.units.length; i++){
+        for( let i=0; i<this.selectedArmy.units.length; i++){
             if(
-                this.armyPlaying.units[i].position.x == position.x
-                && this.armyPlaying.units[i].position.y == position.y
+                this.selectedArmy.units[i].position.x == position.x
+                && this.selectedArmy.units[i].position.y == position.y
             ){
-                this.armyPlaying.units[i].select();
+                if(this.selectedArmy.units[i]._selectable){
+                    this.selectedUnit = this.selectedArmy.units[i];
+                }
             }
         }
     }
@@ -27,6 +31,27 @@ export default class Game{
     canCursorMoveTo(futurePosition){
         return futurePosition.x >=0 && futurePosition.x<this.board.width
           && futurePosition.y >=0 && futurePosition.y<this.board.height;
+    }
+    
+    changePlayingArmy(){
+        if(this.selectedArmy == this.army1){
+            this.selectedArmy = this.army2;
+        }
+        else{
+            this.selectedArmy = this.army1;
+        }
+    }
+    
+    setAllUnitsSelectable(army){
+        for(let unit of army.units){
+            unit.selectable(true);
+        }
+    }
+    
+    setAllUnitsUnselectable(army){
+        for(let unit of army.units){
+            unit.selectable(false);
+        }
     }
     
 }

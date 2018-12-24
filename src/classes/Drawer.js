@@ -1,11 +1,12 @@
 import main_sprite from '../images/main_sprite.png';
 
 export default class Drawer {
-    constructor(config, armiesCtx, boardCtx, cursorCtx ) {
+    constructor(config, armiesCtx, boardCtx, movesCtx, cursorCtx ) {
         this.config = config;
         this._sprite = '';
         this.armiesCtx = armiesCtx;
         this.boardCtx = boardCtx;
+        this.movesCtx = movesCtx;
         this.cursorCtx = cursorCtx;
     }
 
@@ -47,14 +48,37 @@ export default class Drawer {
     }
     
     drawCursor(position){
-        this.cursorCtx.clearRect(0, 0, this.cursorCtx.canvas.clientWidth, this.cursorCtx.canvas.clientHeight);
+        this.cleanCursorCtx();
         this.cursorCtx.drawImage(this._sprite,
                                 this.config.cursor.position.x, this.config.cursor.position.y,
                                 this.config.cursor.size.w, this.config.cursor.size.h,
                                 position.x*this.config.blockSize-3, position.y*this.config.blockSize-5,
                                 this.config.cursor.size.w, this.config.cursor.size.h,
                                 )
-        
+    }
+    
+    drawPossibleUnitMoves(positions){
+        for(let position of positions){
+            this.movesCtx.fillStyle = 'rgba(225,0,0,0.5)';
+            this.movesCtx.fillRect(position.x*this.config.blockSize, position.y*this.config.blockSize,
+                         this.config.blockSize, this.config.blockSize);
+        }
+    }
+    
+    cleanCtx(ctx){
+        ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+    }
+    
+    cleanCursorCtx(){
+        this.cleanCtx(this.cursorCtx);
+    }
+    
+    cleanArmiesCtx(){
+        this.cleanCtx(this.armiesCtx);
+    }
+    
+    cleanMovesCtx(){
+        this.cleanCtx(this.movesCtx);
     }
 
 }
