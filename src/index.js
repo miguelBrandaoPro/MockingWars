@@ -174,6 +174,15 @@ window.onload = () => {
                     }  
                 }
                 break;
+            case 'KeyC':
+                game.changePlayingArmy();
+                break;
+            case 'KeyD':
+                if(game.selectedUnit != null){
+                    game.selectedUnit = null;
+                    drawer.cleanMovesCtx();
+                }
+                break;
             default:
                 console.log(key);
                 break;

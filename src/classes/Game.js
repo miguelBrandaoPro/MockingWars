@@ -35,10 +35,15 @@ export default class Game{
     
     changePlayingArmy(){
         if(this.selectedArmy == this.army1){
+            this.setAllUnitsUnselectable(this.army1);
             this.selectedArmy = this.army2;
+            this.setAllUnitsSelectable(this.army2);
+            
         }
         else{
+            this.setAllUnitsUnselectable(this.army2);
             this.selectedArmy = this.army1;
+            this.setAllUnitsSelectable(this.army1);
         }
     }
     
