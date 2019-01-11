@@ -102,8 +102,8 @@ window.onload = () => {
     const army2 = new Army('Bill', 'Red', [
         new Tank({x:0, y:18}, configTank),
         new Tank({x:0, y:19}, configTank),
-        new Infantry({x:1, y:18}, configInfantry),
-        new Infantry({x:2, y:18}, configInfantry),
+        new Infantry({x:10, y:12}, configInfantry),
+        new Infantry({x:12, y:12}, configInfantry),
         new Bazooka({x:1, y:19}, configBazooka),
         new Bazooka({x:2, y:19}, configBazooka),
     ], drawer);
@@ -152,34 +152,48 @@ window.onload = () => {
                 }
                 break;
             case 'Space':
-                if(game.selectedUnit == null){
-                    game.selectUnit(cursor.position);
-                    if(game.selectedUnit != null){
-                        drawer.drawPossibleUnitMoves(game.selectedUnit.canMoveTo(board));
-                    }
-                }
-                else{         
-                    for(let destPosition of game.selectedUnit.canMoveTo(board)){
-                        if( destPosition.x == cursor.position.x
-                           && destPosition.y == cursor.position.y){
-                            game.selectedUnit.moveTo(cursor.position);
-                            game.selectedUnit._selectable = false;
-                            game.selectedUnit = null;
-                            drawer.cleanArmiesCtx();
-                            drawer.cleanMovesCtx();
-                            game.army1.draw();
-                            game.army2.draw();
-                            break;
+                switch(game.mode){
+                    case 'chooseUnit':
+                        game.selectUnit(cursor.position);
+                        if(game.selectedUnit != null){
+                            game.mode = 'chooseUnitMove';
+                            drawer.drawPossibleUnitMoves(game.selectedUnit.canMoveTo(board));
                         }
-                    }  
+                        break;
+                    case 'chooseUnitMove':
+                        for( let destPosition of game.selectedUnit.canMoveTo(board) ){
+                            if( destPosition.x == cursor.position.x
+                               && destPosition.y == cursor.position.y){
+                                game.selectedUnit.moveTo(cursor.position);
+                                drawer.cleanArmiesCtx();
+                                drawer.cleanMovesCtx();
+                                game.army1.draw();
+                                game.army2.draw();
+                                game.loadPossibleTargets();
+                                if( game.possibleTargets.length > 0 ){
+                                    game.mode = 'chooseTarget';
+                                    drawer.drawPossibleTargets(game.possibleTargets);
+                                }
+                                else{
+                                    game.selectedUnit._selectable = false;
+                                    game.selectedUnit = null;
+                                    game.mode = 'chooseUnit';
+                                }
+
+                                break;
+                            }
+                        }
+                        break;
                 }
                 break;
             case 'KeyC':
                 game.changePlayingArmy();
+                game.mode = 'chooseUnit';
                 break;
             case 'KeyD':
                 if(game.selectedUnit != null){
                     game.selectedUnit = null;
+                    game.mode = 'chooseUnit';
                     drawer.cleanMovesCtx();
                 }
                 break;

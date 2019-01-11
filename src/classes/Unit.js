@@ -58,4 +58,5 @@ export default class Unit {
     selectable(status){
         this._selectable = status;
     }
+    
 }

@@ -6,8 +6,10 @@ export default class Game{
         this.selectedArmy = army1;
         this.selectedUnit = null;
         this.cursor = cursor;
+        this.mode = 'chooseUnit';
         
         this.setAllUnitsSelectable(army1);
+        this.possibleTargets = [];
     }
 
     fight(attacker, defender){
@@ -16,15 +18,10 @@ export default class Game{
     }
 
     selectUnit(position){
-        for( let i=0; i<this.selectedArmy.units.length; i++){
-            if(
-                this.selectedArmy.units[i].position.x == position.x
-                && this.selectedArmy.units[i].position.y == position.y
-            ){
-                if(this.selectedArmy.units[i]._selectable){
-                    this.selectedUnit = this.selectedArmy.units[i];
-                }
-            }
+        let color, unit;
+        [color, unit] = this.getUnitByPosition(position);
+        if( unit != null && unit._selectable ){
+            this.selectedUnit = unit;
         }
     }
     
@@ -59,4 +56,52 @@ export default class Game{
         }
     }
     
+    getUnitByPosition(position){
+      for( let army of [this.army1, this.army2] ){
+          for( let i=0; i<army.units.length; i++){
+                if(
+                    army.units[i].position.x == position.x
+                    && army.units[i].position.y == position.y
+                ){
+                    return [army.color,army.units[i]];
+                }
+            }
+        }  
+        return ['', null]; 
+    }
+    
+    loadPossibleTargets(){
+        console.log('call load possible targets');
+        const positions = [];
+        let color, possibleTarget;
+        if( this.selectedUnit != null ){
+            if( this.selectedUnit.position.x-1 >= 0 ){
+                [color, possibleTarget] = this.getUnitByPosition({x: this.selectedUnit.position.x-1, y: this.selectedUnit.position.y });
+                if( possibleTarget != null && color != this.selectedUnit.color ){
+                    positions.push( possibleTarget.position );
+                } 
+            }
+            if( this.selectedUnit.position.x+1 <= this.board.width ){
+                [color, possibleTarget] = this.getUnitByPosition({x: this.selectedUnit.position.x+1, y: this.selectedUnit.position.y });
+                if( possibleTarget != null && color != this.selectedUnit.color ){
+                    positions.push( possibleTarget.position );
+                } 
+            }
+            if( this.selectedUnit.position.y-1 >= 0 ){
+                [color, possibleTarget] = this.getUnitByPosition({x: this.selectedUnit.position.x, y: this.selectedUnit.position.y-1 });
+                if( possibleTarget != null && color != this.selectedUnit.color ){
+                    positions.push( possibleTarget.position );
+                } 
+            }
+            if( this.selectedUnit.position.y+1 <= this.board.height ){
+                [color, possibleTarget] = this.getUnitByPosition({x: this.selectedUnit.position.x, y: this.selectedUnit.position.y+1 });
+                if( possibleTarget != null && color != this.selectedUnit.color ){
+                    positions.push( possibleTarget.position );
+                } 
+            }  
+        }
+        this.possibleTargets = positions;
+    }
+    
 }
+

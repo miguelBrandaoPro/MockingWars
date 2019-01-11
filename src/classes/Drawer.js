@@ -44,7 +44,20 @@ export default class Drawer {
     }
     
     drawUnit(color, unit){
-        this.draw(this.armiesCtx, this.config.armies[color][unit.type], unit.position); 
+        this.draw(this.armiesCtx, this.config.armies[color][unit.type], unit.position);
+        //Si les points de vie inférieur au max on le dessine
+        if(unit.life < 10){
+            this.armiesCtx.beginPath();
+            this.armiesCtx.arc(unit.position.x*this.config.blockSize+18, unit.position.y*this.config.blockSize+6, 6, 0, 2 * Math.PI, false);
+            this.armiesCtx.fillStyle = 'white';
+            this.armiesCtx.fill();
+            this.armiesCtx.lineWidth = 1;
+            this.armiesCtx.strokeStyle = 'black';
+            this.armiesCtx.stroke();
+            this.armiesCtx.fillStyle = 'black';
+            this.armiesCtx.font = "11px Arial";
+            this.armiesCtx.fillText(unit.life, unit.position.x*this.config.blockSize+15, unit.position.y*this.config.blockSize+10);
+        }
     }
     
     drawCursor(position){
@@ -59,11 +72,21 @@ export default class Drawer {
     
     drawPossibleUnitMoves(positions){
         for(let position of positions){
-            this.movesCtx.fillStyle = 'rgba(225,0,0,0.5)';
+            this.movesCtx.fillStyle = 'rgba(225,0,0,0.3)';
             this.movesCtx.fillRect(position.x*this.config.blockSize, position.y*this.config.blockSize,
                          this.config.blockSize, this.config.blockSize);
         }
     }
+    
+    drawPossibleTargets(positions){
+        console.log(positions);
+        for(let position of positions){
+            this.movesCtx.fillStyle = 'rgba(225,0,0,0.3)';
+            this.movesCtx.fillRect(position.x*this.config.blockSize, position.y*this.config.blockSize,
+                         this.config.blockSize, this.config.blockSize);
+        }
+    }
+    
     
     cleanCtx(ctx){
         ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);

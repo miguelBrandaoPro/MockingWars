@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Game</title>
+    <script src="./main.js"></script>
+    <style>
+  #stage {
+    width: 480px;
+    height: 480px;
+    position: relative;
+    border: 2px solid black
+  }
+  canvas { position: absolute; }
+  #cursor-layer { z-index: 4 }
+  #moves-layer { z-index: 4 }
+  #armies-layer { z-index: 2 }
+  #board-layer { z-index: 1 }
+</style>
+</head>
+<body>
+    <div id="stage">
+        <canvas id="board-layer" width="480" height="480"></canvas>
+        <canvas id="armies-layer" width="480" height="480"></canvas>
+        <canvas id="moves-layer" width="480" height="480"></canvas>
+        <canvas id="cursor-layer" width="480" height="480"></canvas>
+    </div>
+</body>
+</html>
