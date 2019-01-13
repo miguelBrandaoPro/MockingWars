@@ -79,7 +79,6 @@ export default class Drawer {
     }
     
     drawPossibleTargets(positions){
-        console.log(positions);
         for(let position of positions){
             this.movesCtx.fillStyle = 'rgba(225,0,0,0.3)';
             this.movesCtx.fillRect(position.x*this.config.blockSize, position.y*this.config.blockSize,

@@ -104,8 +104,8 @@ window.onload = () => {
         new Tank({x:0, y:19}, configTank),
         new Infantry({x:10, y:12}, configInfantry),
         new Infantry({x:12, y:12}, configInfantry),
-        new Bazooka({x:1, y:19}, configBazooka),
-        new Bazooka({x:2, y:19}, configBazooka),
+        new Bazooka({x:11, y:11}, configBazooka),
+        new Bazooka({x:11, y:13}, configBazooka),
     ], drawer);
     
     const game = new Game(board, army1, army2);
@@ -124,28 +124,60 @@ window.onload = () => {
         let newPosition;
         switch (key){
             case 'ArrowUp':
-                newPosition = {x: cursor.position.x, y: cursor.position.y-1};
+                switch(game.mode){
+                    case 'chooseUnit':
+                    case 'chooseUnitMove':
+                        newPosition = {x: cursor.position.x, y: cursor.position.y-1};
+                        break;
+                    case 'chooseTarget':
+                        newPosition = game.getOtherTargetPosition();
+                        break;
+                }
                 if(game.canCursorMoveTo(newPosition)){
                     cursor.moveTo(newPosition);
                     cursor.draw();
                 }
                 break;
             case 'ArrowDown':
-                newPosition = {x: cursor.position.x, y: cursor.position.y+1};
+                switch(game.mode){
+                    case 'chooseUnit':
+                    case 'chooseUnitMove':
+                        newPosition = {x: cursor.position.x, y: cursor.position.y+1};
+                        break;
+                    case 'chooseTarget':
+                        newPosition = game.getOtherTargetPosition('counterclockwise');
+                        break;
+                }
                 if(game.canCursorMoveTo(newPosition)){
                     cursor.moveTo(newPosition);
                     cursor.draw();
                 }
                 break;
             case 'ArrowLeft':
-                newPosition = {x: cursor.position.x-1, y: cursor.position.y};
+                switch(game.mode){
+                    case 'chooseUnit':
+                    case 'chooseUnitMove':
+                        newPosition = {x: cursor.position.x-1, y: cursor.position.y};
+                        break;
+                    case 'chooseTarget':
+                        newPosition = game.getOtherTargetPosition('counterclockwise');
+                        break;
+                }
                 if(game.canCursorMoveTo(newPosition)){
                     cursor.moveTo(newPosition);
                     cursor.draw();
                 }
                 break;
             case 'ArrowRight':
-                newPosition = {x: cursor.position.x+1, y: cursor.position.y};
+                switch(game.mode){
+                    case 'chooseUnit':
+                    case 'chooseUnitMove':
+                        newPosition = {x: cursor.position.x+1, y: cursor.position.y};
+                        break;
+                    case 'chooseTarget':
+                        newPosition = game.getOtherTargetPosition();
+                        break;
+                }
                 if(game.canCursorMoveTo(newPosition)){
                     cursor.moveTo(newPosition);
                     cursor.draw();
@@ -173,6 +205,8 @@ window.onload = () => {
                                 if( game.possibleTargets.length > 0 ){
                                     game.mode = 'chooseTarget';
                                     drawer.drawPossibleTargets(game.possibleTargets);
+                                    cursor.moveTo(game.possibleTargets[0]);
+                                    cursor.draw();
                                 }
                                 else{
                                     game.selectedUnit._selectable = false;
@@ -183,6 +217,14 @@ window.onload = () => {
                                 break;
                             }
                         }
+                        break;
+                    case 'chooseTarget':
+                        game.fight(game.selectedUnit, game.getUnitByPosition(cursor.position)[1]);
+                        drawer.cleanArmiesCtx();
+                        drawer.cleanMovesCtx();
+                        game.army1.draw();
+                        game.army2.draw();
+                        game.mode = 'chooseUnit';
                         break;
                 }
                 break;

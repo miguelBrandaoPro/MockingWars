@@ -277,18 +277,28 @@ class Tank_Tank extends Unit{
 }
 // CONCATENATED MODULE: ./src/classes/Army.js
 class Army {
-    constructor(general, color, units, drawer){
-        this.general = general;
-        this.color = color;
-        this.units = units;
-        this.drawer = drawer;
+  constructor(general, color, units, drawer) {
+   this.general = general;
+   this.color = color;
+   this.units = units;
+   this.drawer = drawer;
+  }
+
+  draw() {
+    for (let unit of this.units) {
+      if (unit.life > 0) {
+        this.drawer.drawUnit(this.color, unit);
+      }
     }
-    
-    draw(){
-        for( let unit of this.units ){
-            this.drawer.drawUnit(this.color, unit);
-        }
-    }
+  }
+
+  removeDeadUnits() {
+    for (let i = 0; i < this.units.length; i++) {
+      if (unit.life <= 0) {
+        delete( this.units[i] );
+      }
+    }  
+  }
 }
 // CONCATENATED MODULE: ./src/classes/Cursor.js
 class Cursor {
@@ -397,110 +407,131 @@ class Board{
 }
 // CONCATENATED MODULE: ./src/classes/Game.js
 class Game{
-    constructor(board, army1, army2, cursor){
-        this.board = board;
-        this.army1 = army1;
-        this.army2 = army2;
-        this.selectedArmy = army1;
-        this.selectedUnit = null;
-        this.cursor = cursor;
-        this.mode = 'chooseUnit';
-        
-        this.setAllUnitsSelectable(army1);
-        this.possibleTargets = [];
-    }
+  constructor(board, army1, army2, cursor) {
+    this.board = board;
+    this.army1 = army1;
+    this.army2 = army2;
+    this.selectedArmy = army1;
+    this.selectedUnit = null;
+    this.cursor = cursor;
+    this.mode = 'chooseUnit';
+    
+    this.setAllUnitsSelectable(army1);
+    this.possibleTargets = [];
+  }
 
-    fight(attacker, defender){
-        defender.life -= attacker.fight.attack[defender.type];
-        attacker.life -= defender.fight.defense[attacker.type];
-    }
+  fight(attacker, defender) {
+    defender.life -= attacker.fight.attack[defender.type];
+    attacker.life -= defender.fight.defense[attacker.type];
+  }
 
-    selectUnit(position){
-        let color, unit;
-        [color, unit] = this.getUnitByPosition(position);
-        if( unit != null && unit._selectable ){
-            this.selectedUnit = unit;
+  selectUnit(position) {
+    let color, unit;
+    [color, unit] = this.getUnitByPosition(position);
+    if (unit != null && unit._selectable) {
+      this.selectedUnit = unit;
+    }
+  }
+  
+  canCursorMoveTo(futurePosition) {
+    return futurePosition.x >=0 && futurePosition.x<this.board.width
+      && futurePosition.y >=0 && futurePosition.y<this.board.height;
+  }
+  
+  changePlayingArmy() {
+    if (this.selectedArmy == this.army1) {
+      this.setAllUnitsUnselectable(this.army1);
+      this.selectedArmy = this.army2;
+      this.setAllUnitsSelectable(this.army2);    
+    }
+    else {
+      this.setAllUnitsUnselectable(this.army2);
+      this.selectedArmy = this.army1;
+      this.setAllUnitsSelectable(this.army1);
+    }
+  }
+  
+  setAllUnitsSelectable(army) {
+    for (let unit of army.units) {
+      unit.selectable(true);
+    }
+  }
+  
+  setAllUnitsUnselectable(army) {
+    for (let unit of army.units) {
+      unit.selectable(false);
+    }
+  }
+  
+  getUnitByPosition(position) {
+    for (let army of [this.army1, this.army2]) {
+      for (let i=0; i<army.units.length; i++) {
+        if (
+          army.units[i].position.x == position.x
+          && army.units[i].position.y == position.y
+       ) {
+          return [army.color,army.units[i]];
         }
+      }
+    }  
+    return ['', null]; 
+  }
+  
+  loadPossibleTargets() {
+    const positions = [];
+    let color, possibleTarget;
+    if (this.selectedUnit != null) {
+      if (this.selectedUnit.position.x-1 >= 0) {
+        [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x-1, y: this.selectedUnit.position.y });
+        if (possibleTarget != null && color != this.selectedUnit.color) {
+          positions.push(possibleTarget.position);
+        } 
+      }
+      if (this.selectedUnit.position.y-1 >= 0) {
+        [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x, y: this.selectedUnit.position.y-1 });
+        if (possibleTarget != null && color != this.selectedUnit.color) {
+          positions.push(possibleTarget.position);
+        } 
+      }
+      if (this.selectedUnit.position.x+1 <= this.board.width) {
+        [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x+1, y: this.selectedUnit.position.y });
+        if (possibleTarget != null && color != this.selectedUnit.color) {
+          positions.push(possibleTarget.position);
+        } 
+      }
+
+      if (this.selectedUnit.position.y+1 <= this.board.height) {
+        [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x, y: this.selectedUnit.position.y+1 });
+        if (possibleTarget != null && color != this.selectedUnit.color) {
+          positions.push(possibleTarget.position);
+        } 
+      }  
     }
-    
-    canCursorMoveTo(futurePosition){
-        return futurePosition.x >=0 && futurePosition.x<this.board.width
-          && futurePosition.y >=0 && futurePosition.y<this.board.height;
+    this.possibleTargets = positions;
+  }
+  
+  getOtherTargetPosition(mode = 'clockwise') {
+    if (this.possibleTargets.length > 0) {
+      this.changePossibleTargets(mode);
+      return this.possibleTargets[0];
     }
-    
-    changePlayingArmy(){
-        if(this.selectedArmy == this.army1){
-            this.setAllUnitsUnselectable(this.army1);
-            this.selectedArmy = this.army2;
-            this.setAllUnitsSelectable(this.army2);
-            
-        }
-        else{
-            this.setAllUnitsUnselectable(this.army2);
-            this.selectedArmy = this.army1;
-            this.setAllUnitsSelectable(this.army1);
-        }
+    return null;
+  }
+  
+  changePossibleTargets(mode = 'clockwise') {
+    if ('clockwise' == mode) {
+      this.possibleTargets.push(this.possibleTargets.shift());
     }
-    
-    setAllUnitsSelectable(army){
-        for(let unit of army.units){
-            unit.selectable(true);
-        }
+    else {
+      this.possibleTargets.unshift(this.possibleTargets.pop());
     }
-    
-    setAllUnitsUnselectable(army){
-        for(let unit of army.units){
-            unit.selectable(false);
-        }
-    }
-    
-    getUnitByPosition(position){
-      for( let army of [this.army1, this.army2] ){
-          for( let i=0; i<army.units.length; i++){
-                if(
-                    army.units[i].position.x == position.x
-                    && army.units[i].position.y == position.y
-                ){
-                    return [army.color,army.units[i]];
-                }
-            }
-        }  
-        return ['', null]; 
-    }
-    
-    loadPossibleTargets(){
-        console.log('call load possible targets');
-        const positions = [];
-        let color, possibleTarget;
-        if( this.selectedUnit != null ){
-            if( this.selectedUnit.position.x-1 >= 0 ){
-                [color, possibleTarget] = this.getUnitByPosition({x: this.selectedUnit.position.x-1, y: this.selectedUnit.position.y });
-                if( possibleTarget != null && color != this.selectedUnit.color ){
-                    positions.push( possibleTarget.position );
-                } 
-            }
-            if( this.selectedUnit.position.x+1 <= this.board.width ){
-                [color, possibleTarget] = this.getUnitByPosition({x: this.selectedUnit.position.x+1, y: this.selectedUnit.position.y });
-                if( possibleTarget != null && color != this.selectedUnit.color ){
-                    positions.push( possibleTarget.position );
-                } 
-            }
-            if( this.selectedUnit.position.y-1 >= 0 ){
-                [color, possibleTarget] = this.getUnitByPosition({x: this.selectedUnit.position.x, y: this.selectedUnit.position.y-1 });
-                if( possibleTarget != null && color != this.selectedUnit.color ){
-                    positions.push( possibleTarget.position );
-                } 
-            }
-            if( this.selectedUnit.position.y+1 <= this.board.height ){
-                [color, possibleTarget] = this.getUnitByPosition({x: this.selectedUnit.position.x, y: this.selectedUnit.position.y+1 });
-                if( possibleTarget != null && color != this.selectedUnit.color ){
-                    positions.push( possibleTarget.position );
-                } 
-            }  
-        }
-        this.possibleTargets = positions;
-    }
-    
+  }
+
+  cleanArmies() {
+    this.army1.removeDeadUnits();
+    this.army2.removeDeadUnits();
+  }
+   
 }
 
 
@@ -590,7 +621,6 @@ class Drawer_Drawer {
     }
     
     drawPossibleTargets(positions){
-        console.log(positions);
         for(let position of positions){
             this.movesCtx.fillStyle = 'rgba(225,0,0,0.3)';
             this.movesCtx.fillRect(position.x*this.config.blockSize, position.y*this.config.blockSize,
@@ -723,8 +753,8 @@ window.onload = () => {
         new Tank_Tank({x:0, y:19}, configTank),
         new Infantry_Infantry({x:10, y:12}, configInfantry),
         new Infantry_Infantry({x:12, y:12}, configInfantry),
-        new Bazooka_Bazooka({x:1, y:19}, configBazooka),
-        new Bazooka_Bazooka({x:2, y:19}, configBazooka),
+        new Bazooka_Bazooka({x:11, y:11}, configBazooka),
+        new Bazooka_Bazooka({x:11, y:13}, configBazooka),
     ], drawer);
     
     const game = new Game(board, army1, army2);
@@ -743,28 +773,60 @@ window.onload = () => {
         let newPosition;
         switch (key){
             case 'ArrowUp':
-                newPosition = {x: cursor.position.x, y: cursor.position.y-1};
+                switch(game.mode){
+                    case 'chooseUnit':
+                    case 'chooseUnitMove':
+                        newPosition = {x: cursor.position.x, y: cursor.position.y-1};
+                        break;
+                    case 'chooseTarget':
+                        newPosition = game.getOtherTargetPosition();
+                        break;
+                }
                 if(game.canCursorMoveTo(newPosition)){
                     cursor.moveTo(newPosition);
                     cursor.draw();
                 }
                 break;
             case 'ArrowDown':
-                newPosition = {x: cursor.position.x, y: cursor.position.y+1};
+                switch(game.mode){
+                    case 'chooseUnit':
+                    case 'chooseUnitMove':
+                        newPosition = {x: cursor.position.x, y: cursor.position.y+1};
+                        break;
+                    case 'chooseTarget':
+                        newPosition = game.getOtherTargetPosition('counterclockwise');
+                        break;
+                }
                 if(game.canCursorMoveTo(newPosition)){
                     cursor.moveTo(newPosition);
                     cursor.draw();
                 }
                 break;
             case 'ArrowLeft':
-                newPosition = {x: cursor.position.x-1, y: cursor.position.y};
+                switch(game.mode){
+                    case 'chooseUnit':
+                    case 'chooseUnitMove':
+                        newPosition = {x: cursor.position.x-1, y: cursor.position.y};
+                        break;
+                    case 'chooseTarget':
+                        newPosition = game.getOtherTargetPosition('counterclockwise');
+                        break;
+                }
                 if(game.canCursorMoveTo(newPosition)){
                     cursor.moveTo(newPosition);
                     cursor.draw();
                 }
                 break;
             case 'ArrowRight':
-                newPosition = {x: cursor.position.x+1, y: cursor.position.y};
+                switch(game.mode){
+                    case 'chooseUnit':
+                    case 'chooseUnitMove':
+                        newPosition = {x: cursor.position.x+1, y: cursor.position.y};
+                        break;
+                    case 'chooseTarget':
+                        newPosition = game.getOtherTargetPosition();
+                        break;
+                }
                 if(game.canCursorMoveTo(newPosition)){
                     cursor.moveTo(newPosition);
                     cursor.draw();
@@ -792,6 +854,8 @@ window.onload = () => {
                                 if( game.possibleTargets.length > 0 ){
                                     game.mode = 'chooseTarget';
                                     drawer.drawPossibleTargets(game.possibleTargets);
+                                    cursor.moveTo(game.possibleTargets[0]);
+                                    cursor.draw();
                                 }
                                 else{
                                     game.selectedUnit._selectable = false;
@@ -802,6 +866,14 @@ window.onload = () => {
                                 break;
                             }
                         }
+                        break;
+                    case 'chooseTarget':
+                        game.fight(game.selectedUnit, game.getUnitByPosition(cursor.position)[1]);
+                        drawer.cleanArmiesCtx();
+                        drawer.cleanMovesCtx();
+                        game.army1.draw();
+                        game.army2.draw();
+                        game.mode = 'chooseUnit';
                         break;
                 }
                 break;
