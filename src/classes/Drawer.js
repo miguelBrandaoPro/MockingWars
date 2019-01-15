@@ -45,6 +45,7 @@ export default class Drawer {
     
     drawUnit(color, unit){
         this.draw(this.armiesCtx, this.config.armies[color][unit.type], unit.position);
+        
         //Si les points de vie inférieur au max on le dessine
         if(unit.life < 10){
             this.armiesCtx.beginPath();
@@ -57,6 +58,12 @@ export default class Drawer {
             this.armiesCtx.fillStyle = 'black';
             this.armiesCtx.font = "11px Arial";
             this.armiesCtx.fillText(unit.life, unit.position.x*this.config.blockSize+15, unit.position.y*this.config.blockSize+10);
+        }
+        
+        if (!unit._selectable){
+            this.movesCtx.fillStyle = 'rgba(50, 50, 50, 0.3)';
+            this.movesCtx.fillRect(unit.position.x*this.config.blockSize, unit.position.y*this.config.blockSize,
+                         this.config.blockSize, this.config.blockSize);  
         }
     }
     

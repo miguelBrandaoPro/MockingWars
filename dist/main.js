@@ -191,45 +191,6 @@ class Unit {
         this.fight = config.fight
     }
 
-    canMoveTo(board){
-        const positions = [];
-        const minX = this.position.x - this.moveMax;
-        const minY = this.position.y - this.moveMax;
-        const maxX = this.position.x + this.moveMax;
-        const maxY = this.position.y + this.moveMax;
-
-        //Boucle du plus petit X au plus grand possible pour l'unité
-        for(let iX = Math.max(minX, 0);
-            iX <= Math.min(maxX, board.width);
-            iX++  ){
-
-            //On ajoute la position iX, y courant de l'unité
-            if(iX != this.position.x){
-                positions.push({x:iX, y:this.position.y});
-            }
-
-            const movesLeft = this.moveMax - (Math.abs(this.position.x - iX));
-
-            //si on n'utilise pas tous les mouvements possibles pour aller à ce X on peut bouger sur Y
-            if( iX > minX ){
-                //Du y - mouvement restant au y + mouvement restant
-                for(let iY = Math.max( this.position.y - movesLeft, 0);
-                    iY <= Math.min(this.position.y + movesLeft, board.height);
-                    iY++){
-                    //Si iY = y courant de l'unité on n'ajoute pas au tableau, déjà fait.
-                    if(iY == this.position.y){
-                        continue;
-                    }
-                    else{
-                        positions.push({x:iX, y:iY});
-                    }
-                }
-            }
-
-        }
-        return positions;
-    }
-
     moveTo(position){
         this.position = position;
     }
@@ -423,6 +384,7 @@ class Game{
   fight(attacker, defender) {
     defender.life -= attacker.fight.attack[defender.type];
     attacker.life -= defender.fight.defense[attacker.type];
+    attacker.selectable(false);
   }
 
   selectUnit(position) {
@@ -466,12 +428,12 @@ class Game{
   getUnitByPosition(position) {
     for (let army of [this.army1, this.army2]) {
       for (let i=0; i<army.units.length; i++) {
-        if (
-          army.units[i].position.x == position.x
-          && army.units[i].position.y == position.y
+    if (
+      army.units[i].position.x == position.x
+      && army.units[i].position.y == position.y
        ) {
-          return [army.color,army.units[i]];
-        }
+      return [army.color,army.units[i]];
+    }
       }
     }  
     return ['', null]; 
@@ -481,30 +443,17 @@ class Game{
     const positions = [];
     let color, possibleTarget;
     if (this.selectedUnit != null) {
-      if (this.selectedUnit.position.x-1 >= 0) {
-        [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x-1, y: this.selectedUnit.position.y });
-        if (possibleTarget != null && color != this.selectedUnit.color) {
-          positions.push(possibleTarget.position);
-        } 
-      }
-      if (this.selectedUnit.position.y-1 >= 0) {
-        [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x, y: this.selectedUnit.position.y-1 });
-        if (possibleTarget != null && color != this.selectedUnit.color) {
-          positions.push(possibleTarget.position);
-        } 
-      }
-      if (this.selectedUnit.position.x+1 <= this.board.width) {
-        [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x+1, y: this.selectedUnit.position.y });
-        if (possibleTarget != null && color != this.selectedUnit.color) {
-          positions.push(possibleTarget.position);
-        } 
-      }
-
-      if (this.selectedUnit.position.y+1 <= this.board.height) {
-        [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x, y: this.selectedUnit.position.y+1 });
-        if (possibleTarget != null && color != this.selectedUnit.color) {
-          positions.push(possibleTarget.position);
-        } 
+      for (let add of [[-1, 0], [0, -1], [1, 0], [0, 1]]) {
+    if (this.selectedUnit.position.x+add[0] >= 0
+       && this.selectedUnit.position.x+add[0] <= this.board.width
+       && this.selectedUnit.position.y+add[1] >= 0
+       && this.selectedUnit.position.y+add[1] <= this.board.height) {
+      [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x+add[0], 
+                                 y: this.selectedUnit.position.y+add[1] });
+      if (possibleTarget != null && color != this.selectedUnit.color) {
+        positions.push(possibleTarget.position);
+      } 
+    }      
       }  
     }
     this.possibleTargets = positions;
@@ -530,6 +479,46 @@ class Game{
   cleanArmies() {
     this.army1.removeDeadUnits();
     this.army2.removeDeadUnits();
+  }
+    
+  selectedUnitCanMoveTo(){
+    const positions = [];
+    const minX = this.selectedUnit.position.x - this.selectedUnit.moveMax;
+    const minY = this.selectedUnit.position.y - this.selectedUnit.moveMax;
+    const maxX = this.selectedUnit.position.x + this.selectedUnit.moveMax;
+    const maxY = this.selectedUnit.position.y + this.selectedUnit.moveMax;
+
+    //Boucle du plus petit X au plus grand possible pour l'unité
+    for (let iX = Math.max(minX, 0);
+        iX <= Math.min(maxX, this.board.width);
+        iX++) {
+
+        //On ajoute la position iX, y courant de l'unité
+        if (iX != this.selectedUnit.position.x 
+            && this.getUnitByPosition({x:iX, y:this.selectedUnit.position.y})[1] == null) {
+          positions.push({x:iX, y:this.selectedUnit.position.y});
+        }
+
+        const movesLeft = this.selectedUnit.moveMax - (Math.abs(this.selectedUnit.position.x - iX));
+
+        //si on n'utilise pas tous les mouvements possibles pour aller à ce X on peut bouger sur Y
+        if (iX > minX) {
+          //Du y - mouvement restant au y + mouvement restant
+          for (let iY = Math.max( this.selectedUnit.position.y - movesLeft, 0);
+              iY <= Math.min(this.selectedUnit.position.y + movesLeft, this.board.height);
+              iY++) {
+              //Si iY = y courant de l'Unité on n'ajoute pas au tableau, déjà fait.
+              if (iY == this.selectedUnit.position.y) {
+                continue;
+              }
+              else if(this.getUnitByPosition({x:iX, y:iY})[1] == null) {
+                positions.push({x:iX, y:iY});
+              }
+          }
+        }
+    }
+
+    return positions;
   }
    
 }
@@ -587,6 +576,7 @@ class Drawer_Drawer {
     
     drawUnit(color, unit){
         this.draw(this.armiesCtx, this.config.armies[color][unit.type], unit.position);
+        
         //Si les points de vie inférieur au max on le dessine
         if(unit.life < 10){
             this.armiesCtx.beginPath();
@@ -599,6 +589,12 @@ class Drawer_Drawer {
             this.armiesCtx.fillStyle = 'black';
             this.armiesCtx.font = "11px Arial";
             this.armiesCtx.fillText(unit.life, unit.position.x*this.config.blockSize+15, unit.position.y*this.config.blockSize+10);
+        }
+        
+        if (!unit._selectable){
+            this.movesCtx.fillStyle = 'rgba(50, 50, 50, 0.3)';
+            this.movesCtx.fillRect(unit.position.x*this.config.blockSize, unit.position.y*this.config.blockSize,
+                         this.config.blockSize, this.config.blockSize);  
         }
     }
     
@@ -833,32 +829,32 @@ window.onload = () => {
                 }
                 break;
             case 'Space':
-                switch(game.mode){
+                switch (game.mode) {
                     case 'chooseUnit':
                         game.selectUnit(cursor.position);
-                        if(game.selectedUnit != null){
+                        if (game.selectedUnit != null) {
                             game.mode = 'chooseUnitMove';
-                            drawer.drawPossibleUnitMoves(game.selectedUnit.canMoveTo(board));
+                            drawer.drawPossibleUnitMoves(game.selectedUnitCanMoveTo());
                         }
                         break;
                     case 'chooseUnitMove':
-                        for( let destPosition of game.selectedUnit.canMoveTo(board) ){
-                            if( destPosition.x == cursor.position.x
-                               && destPosition.y == cursor.position.y){
+                        for (let destPosition of game.selectedUnitCanMoveTo()){
+                            if (destPosition.x == cursor.position.x
+                               && destPosition.y == cursor.position.y) {
                                 game.selectedUnit.moveTo(cursor.position);
                                 drawer.cleanArmiesCtx();
                                 drawer.cleanMovesCtx();
                                 game.army1.draw();
                                 game.army2.draw();
                                 game.loadPossibleTargets();
-                                if( game.possibleTargets.length > 0 ){
+                                if (game.possibleTargets.length > 0){
                                     game.mode = 'chooseTarget';
                                     drawer.drawPossibleTargets(game.possibleTargets);
                                     cursor.moveTo(game.possibleTargets[0]);
                                     cursor.draw();
                                 }
                                 else{
-                                    game.selectedUnit._selectable = false;
+                                    game.selectedUnit.selectable(false);
                                     game.selectedUnit = null;
                                     game.mode = 'chooseUnit';
                                 }
@@ -879,6 +875,10 @@ window.onload = () => {
                 break;
             case 'KeyC':
                 game.changePlayingArmy();
+                drawer.cleanArmiesCtx();
+                drawer.cleanMovesCtx();
+                game.army1.draw();
+                game.army2.draw();
                 game.mode = 'chooseUnit';
                 break;
             case 'KeyD':

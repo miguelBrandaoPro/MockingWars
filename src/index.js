@@ -184,32 +184,32 @@ window.onload = () => {
                 }
                 break;
             case 'Space':
-                switch(game.mode){
+                switch (game.mode) {
                     case 'chooseUnit':
                         game.selectUnit(cursor.position);
-                        if(game.selectedUnit != null){
+                        if (game.selectedUnit != null) {
                             game.mode = 'chooseUnitMove';
-                            drawer.drawPossibleUnitMoves(game.selectedUnit.canMoveTo(board));
+                            drawer.drawPossibleUnitMoves(game.selectedUnitCanMoveTo());
                         }
                         break;
                     case 'chooseUnitMove':
-                        for( let destPosition of game.selectedUnit.canMoveTo(board) ){
-                            if( destPosition.x == cursor.position.x
-                               && destPosition.y == cursor.position.y){
+                        for (let destPosition of game.selectedUnitCanMoveTo()){
+                            if (destPosition.x == cursor.position.x
+                               && destPosition.y == cursor.position.y) {
                                 game.selectedUnit.moveTo(cursor.position);
                                 drawer.cleanArmiesCtx();
                                 drawer.cleanMovesCtx();
                                 game.army1.draw();
                                 game.army2.draw();
                                 game.loadPossibleTargets();
-                                if( game.possibleTargets.length > 0 ){
+                                if (game.possibleTargets.length > 0){
                                     game.mode = 'chooseTarget';
                                     drawer.drawPossibleTargets(game.possibleTargets);
                                     cursor.moveTo(game.possibleTargets[0]);
                                     cursor.draw();
                                 }
                                 else{
-                                    game.selectedUnit._selectable = false;
+                                    game.selectedUnit.selectable(false);
                                     game.selectedUnit = null;
                                     game.mode = 'chooseUnit';
                                 }
@@ -230,6 +230,10 @@ window.onload = () => {
                 break;
             case 'KeyC':
                 game.changePlayingArmy();
+                drawer.cleanArmiesCtx();
+                drawer.cleanMovesCtx();
+                game.army1.draw();
+                game.army2.draw();
                 game.mode = 'chooseUnit';
                 break;
             case 'KeyD':
