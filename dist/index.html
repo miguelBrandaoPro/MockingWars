@@ -11,6 +11,11 @@
     position: relative;
     border: 2px solid black
   }
+  #message {
+    border: 2px solid black;
+    padding: 10px;
+    margin: 10px;
+  }
   canvas { position: absolute; }
   #cursor-layer { z-index: 4 }
   #moves-layer { z-index: 3 }
@@ -25,5 +30,6 @@
         <canvas id="moves-layer" width="480" height="480"></canvas>
         <canvas id="cursor-layer" width="480" height="480"></canvas>
     </div>
+    <div id="message"></div>
 </body>
 </html>

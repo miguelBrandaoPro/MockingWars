@@ -442,18 +442,19 @@ class Game{
   loadPossibleTargets() {
     const positions = [];
     let color, possibleTarget;
-    if (this.selectedUnit != null) {
+    if (null != this.selectedUnit) {
       for (let add of [[-1, 0], [0, -1], [1, 0], [0, 1]]) {
-    if (this.selectedUnit.position.x+add[0] >= 0
-       && this.selectedUnit.position.x+add[0] <= this.board.width
-       && this.selectedUnit.position.y+add[1] >= 0
-       && this.selectedUnit.position.y+add[1] <= this.board.height) {
-      [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x+add[0], 
-                                 y: this.selectedUnit.position.y+add[1] });
-      if (possibleTarget != null && color != this.selectedUnit.color) {
-        positions.push(possibleTarget.position);
-      } 
-    }      
+        if (this.selectedUnit.position.x+add[0] >= 0
+            && this.selectedUnit.position.x+add[0] <= this.board.width
+            && this.selectedUnit.position.y+add[1] >= 0
+            && this.selectedUnit.position.y+add[1] <= this.board.height) {
+          [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x+add[0], 
+                                                             y: this.selectedUnit.position.y+add[1] });
+        
+          if (null != possibleTarget && color != this.selectedArmy.color) {
+            positions.push(possibleTarget.position);
+          } 
+        }      
       }  
     }
     this.possibleTargets = positions;
@@ -511,7 +512,7 @@ class Game{
               if (iY == this.selectedUnit.position.y) {
                 continue;
               }
-              else if(this.getUnitByPosition({x:iX, y:iY})[1] == null) {
+              else if (this.getUnitByPosition({x:iX, y:iY})[1] == null) {
                 positions.push({x:iX, y:iY});
               }
           }
@@ -642,7 +643,32 @@ class Drawer_Drawer {
     }
 
 }
+// CONCATENATED MODULE: ./src/classes/MessageManager.js
+class MessageManager {
+    
+  constructor(element) {
+    this.element = element;
+  }
+    
+  cleanMessage(){
+    this.element.textContent = '';
+  }
+    
+  add(message){
+    let p = document.createElement("p");
+    p.textContent = message; 
+    this.element.append(message);
+  }
+    
+  replace(message){
+    this.cleanMessage();
+    this.add(message);   
+  }
+    
+}
 // CONCATENATED MODULE: ./src/index.js
+
+
 
 
 
@@ -734,6 +760,10 @@ window.onload = () => {
     const drawer = new Drawer_Drawer(sprite, armiesCtx, boardCtx, movesCtx, cursorCtx );
     const board = new Board(map1, drawer);
     const cursor = new Cursor({x:board.width/2, y:board.height/2}, drawer);
+    
+    const messageManager = new MessageManager(document.querySelector('#message'));
+    
+    messageManager.add('Choisissez une unité.');
 
     const army1 = new Army('Bob', 'Blue', [
         new Tank_Tank({x:18, y:0}, configTank),
@@ -834,6 +864,7 @@ window.onload = () => {
                         game.selectUnit(cursor.position);
                         if (game.selectedUnit != null) {
                             game.mode = 'chooseUnitMove';
+                            messageManager.replace('Choisissez la destination pour l\'unité.');
                             drawer.drawPossibleUnitMoves(game.selectedUnitCanMoveTo());
                         }
                         break;
@@ -844,11 +875,10 @@ window.onload = () => {
                                 game.selectedUnit.moveTo(cursor.position);
                                 drawer.cleanArmiesCtx();
                                 drawer.cleanMovesCtx();
-                                game.army1.draw();
-                                game.army2.draw();
                                 game.loadPossibleTargets();
                                 if (game.possibleTargets.length > 0){
                                     game.mode = 'chooseTarget';
+                                    messageManager.replace('Choisissez une cible.');
                                     drawer.drawPossibleTargets(game.possibleTargets);
                                     cursor.moveTo(game.possibleTargets[0]);
                                     cursor.draw();
@@ -857,8 +887,10 @@ window.onload = () => {
                                     game.selectedUnit.selectable(false);
                                     game.selectedUnit = null;
                                     game.mode = 'chooseUnit';
+                                    messageManager.replace('Choisissez une cible.');
                                 }
-
+                                game.army1.draw();
+                                game.army2.draw();
                                 break;
                             }
                         }
@@ -870,6 +902,7 @@ window.onload = () => {
                         game.army1.draw();
                         game.army2.draw();
                         game.mode = 'chooseUnit';
+                        messageManager.replace('Choisissez une unité.');
                         break;
                 }
                 break;
@@ -880,11 +913,13 @@ window.onload = () => {
                 game.army1.draw();
                 game.army2.draw();
                 game.mode = 'chooseUnit';
+                messageManager.replace('Choisissez une unité.');
                 break;
             case 'KeyD':
                 if(game.selectedUnit != null){
                     game.selectedUnit = null;
                     game.mode = 'chooseUnit';
+                    messageManager.replace('Choisissez une unité.');
                     drawer.cleanMovesCtx();
                 }
                 break;
@@ -893,9 +928,6 @@ window.onload = () => {
                 break;
         }
     }
-    
-
-    
 
 
 }

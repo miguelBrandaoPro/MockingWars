@@ -73,18 +73,19 @@ export default class Game{
   loadPossibleTargets() {
     const positions = [];
     let color, possibleTarget;
-    if (this.selectedUnit != null) {
+    if (null != this.selectedUnit) {
       for (let add of [[-1, 0], [0, -1], [1, 0], [0, 1]]) {
-    if (this.selectedUnit.position.x+add[0] >= 0
-       && this.selectedUnit.position.x+add[0] <= this.board.width
-       && this.selectedUnit.position.y+add[1] >= 0
-       && this.selectedUnit.position.y+add[1] <= this.board.height) {
-      [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x+add[0], 
-                                 y: this.selectedUnit.position.y+add[1] });
-      if (possibleTarget != null && color != this.selectedUnit.color) {
-        positions.push(possibleTarget.position);
-      } 
-    }      
+        if (this.selectedUnit.position.x+add[0] >= 0
+            && this.selectedUnit.position.x+add[0] <= this.board.width
+            && this.selectedUnit.position.y+add[1] >= 0
+            && this.selectedUnit.position.y+add[1] <= this.board.height) {
+          [color, possibleTarget] = this.getUnitByPosition({ x: this.selectedUnit.position.x+add[0], 
+                                                             y: this.selectedUnit.position.y+add[1] });
+        
+          if (null != possibleTarget && color != this.selectedArmy.color) {
+            positions.push(possibleTarget.position);
+          } 
+        }      
       }  
     }
     this.possibleTargets = positions;
@@ -142,7 +143,7 @@ export default class Game{
               if (iY == this.selectedUnit.position.y) {
                 continue;
               }
-              else if(this.getUnitByPosition({x:iX, y:iY})[1] == null) {
+              else if (this.getUnitByPosition({x:iX, y:iY})[1] == null) {
                 positions.push({x:iX, y:iY});
               }
           }

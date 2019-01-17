@@ -16,6 +16,8 @@ import Game from './classes/Game';
 
 import Drawer from './classes/Drawer';
 
+import MessageManager from './classes/MessageManager';
+
 const configTank = {
     life: 10,
     moveMax: 7,
@@ -89,6 +91,10 @@ window.onload = () => {
     const drawer = new Drawer(configSprite, armiesCtx, boardCtx, movesCtx, cursorCtx );
     const board = new Board(configMap, drawer);
     const cursor = new Cursor({x:board.width/2, y:board.height/2}, drawer);
+    
+    const messageManager = new MessageManager(document.querySelector('#message'));
+    
+    messageManager.add('Choisissez une unité.');
 
     const army1 = new Army('Bob', 'Blue', [
         new Tank({x:18, y:0}, configTank),
@@ -189,6 +195,7 @@ window.onload = () => {
                         game.selectUnit(cursor.position);
                         if (game.selectedUnit != null) {
                             game.mode = 'chooseUnitMove';
+                            messageManager.replace('Choisissez la destination pour l\'unité.');
                             drawer.drawPossibleUnitMoves(game.selectedUnitCanMoveTo());
                         }
                         break;
@@ -199,11 +206,10 @@ window.onload = () => {
                                 game.selectedUnit.moveTo(cursor.position);
                                 drawer.cleanArmiesCtx();
                                 drawer.cleanMovesCtx();
-                                game.army1.draw();
-                                game.army2.draw();
                                 game.loadPossibleTargets();
                                 if (game.possibleTargets.length > 0){
                                     game.mode = 'chooseTarget';
+                                    messageManager.replace('Choisissez une cible.');
                                     drawer.drawPossibleTargets(game.possibleTargets);
                                     cursor.moveTo(game.possibleTargets[0]);
                                     cursor.draw();
@@ -212,8 +218,10 @@ window.onload = () => {
                                     game.selectedUnit.selectable(false);
                                     game.selectedUnit = null;
                                     game.mode = 'chooseUnit';
+                                    messageManager.replace('Choisissez une cible.');
                                 }
-
+                                game.army1.draw();
+                                game.army2.draw();
                                 break;
                             }
                         }
@@ -225,6 +233,7 @@ window.onload = () => {
                         game.army1.draw();
                         game.army2.draw();
                         game.mode = 'chooseUnit';
+                        messageManager.replace('Choisissez une unité.');
                         break;
                 }
                 break;
@@ -235,11 +244,13 @@ window.onload = () => {
                 game.army1.draw();
                 game.army2.draw();
                 game.mode = 'chooseUnit';
+                messageManager.replace('Choisissez une unité.');
                 break;
             case 'KeyD':
                 if(game.selectedUnit != null){
                     game.selectedUnit = null;
                     game.mode = 'chooseUnit';
+                    messageManager.replace('Choisissez une unité.');
                     drawer.cleanMovesCtx();
                 }
                 break;
@@ -248,9 +259,6 @@ window.onload = () => {
                 break;
         }
     }
-    
-
-    
 
 
 }
